@@ -1,0 +1,68 @@
+name: ZipPreview
+options:
+  bundleIdPrefix: com.github.wolfposd
+  deploymentTarget:
+    macOS: "14.0"
+  createIntermediateGroups: true
+settings:
+  base:
+    SWIFT_VERSION: "5.0"
+    MARKETING_VERSION: "1.0"
+    CURRENT_PROJECT_VERSION: "1"
+    CODE_SIGN_IDENTITY: "-"
+    CODE_SIGN_STYLE: Manual
+    DEVELOPMENT_TEAM: ""
+    ENABLE_HARDENED_RUNTIME: YES
+    SWIFT_INCLUDE_PATHS: $(SRCROOT)/Core/CArchive
+
+targets:
+  ZipPreview:
+    type: application
+    platform: macOS
+    sources: [App]
+    settings:
+      base:
+        PRODUCT_BUNDLE_IDENTIFIER: com.github.wolfposd.zippreview
+        CODE_SIGN_ENTITLEMENTS: App/ZipPreview.entitlements
+        ASSETCATALOG_COMPILER_APPICON_NAME: AppIcon
+        GENERATE_INFOPLIST_FILE: YES
+        INFOPLIST_KEY_CFBundleDisplayName: Archive Preview
+        INFOPLIST_KEY_LSApplicationCategoryType: public.app-category.utilities
+    dependencies:
+      - target: ArchivePreviewExtension
+
+  ArchivePreviewExtension:
+    type: app-extension
+    platform: macOS
+    sources:
+      - Extension
+      - path: Core
+        excludes: ["CArchive/**"]
+    settings:
+      base:
+        PRODUCT_BUNDLE_IDENTIFIER: com.github.wolfposd.zippreview.preview
+        INFOPLIST_FILE: Extension/Info.plist
+        CODE_SIGN_ENTITLEMENTS: Extension/ArchivePreview.entitlements
+    dependencies:
+      - sdk: QuickLookUI.framework
+
+  ArchiveCoreTests:
+    type: bundle.unit-test
+    platform: macOS
+    sources:
+      - path: Tests
+        excludes: ["Fixtures/**"]
+      - path: Core
+        excludes: ["CArchive/**"]
+    settings:
+      base:
+        GENERATE_INFOPLIST_FILE: YES
+        PRODUCT_BUNDLE_IDENTIFIER: com.github.wolfposd.zippreview.tests
+
+schemes:
+  ZipPreview:
+    build:
+      targets:
+        ZipPreview: all
+    test:
+      targets: [ArchiveCoreTests]
